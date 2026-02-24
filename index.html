@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>API Chatbot</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 420px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 12px;
+            background: #0b5ed7;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .chat-box {
+            padding: 15px;
+            height: 350px;
+            overflow-y: auto;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .message {
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .user {
+            text-align: right;
+            color: #0b5ed7;
+            font-weight: bold;
+        }
+
+        .bot {
+            text-align: left;
+            color: #198754;
+            white-space: pre-wrap; /* important for multiline response */
+        }
+
+        .input-area {
+            display: flex;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            border-radius: 0 0 0 10px;
+        }
+
+        .input-area button {
+            padding: 10px 15px;
+            border: none;
+            background: #0b5ed7;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 0 0 10px 0;
+        }
+
+        .input-area button:hover {
+            background: #084298;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-header">Chatbot</div>
+
+    <div class="chat-box" id="chatBox"></div>
+
+    <div class="input-area">
+        <input
+            type="text"
+            id="userInput"
+            placeholder="Ask something..."
+            onkeydown="if(event.key === 'Enter') sendMessage()"
+        />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    async function sendMessage() {
+        const input = document.getElementById("userInput");
+        const chatBox = document.getElementById("chatBox");
+        const message = input.value.trim();
+
+        if (!message) return;
+
+        // Show user message
+        chatBox.innerHTML += `<div class="message user">You: ${message}</div>`;
+        input.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        try {
+            const response = await fetch("https://chatbot-api-alpha.vercel.app/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    query: message
+                })
+            });
+
+            const data = await response.json();
+
+            // Show bot response
+            chatBox.innerHTML += `<div class="message bot">Bot: ${data.response}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+        } catch (error) {
+            chatBox.innerHTML += `<div class="message bot">Bot: ❌ API error</div>`;
+        }
+    }
+</script>
+
+</body>
+</html>
